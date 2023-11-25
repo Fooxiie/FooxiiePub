@@ -11,6 +11,10 @@ Discord : [https://discord.gg/VCRKu6uFf5](https://discord.gg/u3XuSFQDNh)
  
  Copy all in your plugins folder. A this moment stop and restart your server and it's done.
 
+# Commands
+
+/pub : to Open Dialog
+
  # Configuration
  PricePub: The cost of the SMS ad campaign.
  
