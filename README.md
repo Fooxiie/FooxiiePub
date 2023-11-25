@@ -1,5 +1,5 @@
 # FooxiiePub
- NovaLife Amboise plugin to buy SMS ads
+ NovaLife Amboise plugin to buy SMS ads, fee on ads and configurable
 
 # To contribute and motivate myself:
 BuyMeACoffee : https://www.buymeacoffee.com/devfooxiie
