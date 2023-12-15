@@ -19,10 +19,10 @@ namespace FooxiiePub
 {
     public class FooxiiePub : Plugin
     {
-        public static double PricePub { get; private set; }
+        private static double PricePub { get; set; }
         public static string PubName { get; private set; }
-        public static string TitleNotif { get; private set; }
-        public static string MessageNotif { get; private set; }
+        private static string TitleNotif { get; set; }
+        private static string MessageNotif { get; set; }
 
         public FooxiiePub(IGameAPI api) : base(api)
         {
@@ -45,7 +45,7 @@ namespace FooxiiePub
                 File.WriteAllText(configFilePath, "{\n    \"PricePub\": 1000,\n    \"PubName\": \"PUB\",\n    \"TitleNotif\": \"Pub\",\n    \"MessageNotif\": \"Une nouvelle pub est disponible par SMS\"\n}");
             }
 
-            Config configuration = ChargerConfiguration(configFilePath);
+            var configuration = ChargerConfiguration(configFilePath);
 
             PricePub = configuration.PricePub;
             PubName = configuration.PubName;
@@ -55,26 +55,26 @@ namespace FooxiiePub
             SetupCommand();
         }
 
-        static Config ChargerConfiguration(string cheminFichierConfig)
+        private static Config ChargerConfiguration(string cheminFichierConfig)
         {
-            string jsonConfig = File.ReadAllText(cheminFichierConfig);
+            var jsonConfig = File.ReadAllText(cheminFichierConfig);
             return JsonConvert.DeserializeObject<Config>(jsonConfig);
         }
 
         private static void SetupCommand()
         {
-            SChatCommand sChatCommand = new SChatCommand("/pub",
+            var sChatCommand = new SChatCommand("/pub",
                 "Créer une campagne de pub par SMS",
                 "/pub", (Action<Player, string[]>)((player, arg) =>
                 {
-                    string name = "";
-                    bool needPhone = false;
+                    var name = "";
+                    var needPhone = false;
 
-                    UIPanel messagePanel = new UIPanel($"Message de la pub", UIPanel.PanelType.Input)
+                    var messagePanel = new UIPanel($"Message de la pub", UIPanel.PanelType.Input)
                         .AddButton("Fermer", (ui) => { player.ClosePanel(ui); })
                         .AddButton($"Payer ({PricePub}€)", (ui) =>
                         {
-                            string message = ui.inputText;
+                            var message = ui.inputText;
 
                             if (message != null && message.Length > 4 && message.Length < 300)
                             {
@@ -98,7 +98,7 @@ namespace FooxiiePub
                             player.ClosePanel(ui);
                         });
 
-                    UIPanel needPhoneNumberPanel =
+                    var needPhoneNumberPanel =
                         new UIPanel($"Ajouter le numéro de téléphone ? (Oui/Non)", UIPanel.PanelType.Text)
                             .AddButton("Oui", (ui) =>
                             {
@@ -113,7 +113,7 @@ namespace FooxiiePub
                                 player.ShowPanelUI(messagePanel);
                             });
 
-                    UIPanel namePanel = new UIPanel($"Nom de l'envoyeur", UIPanel.PanelType.Input)
+                    var namePanel = new UIPanel($"Nom de l'envoyeur", UIPanel.PanelType.Input)
                         .AddButton("Fermer", (ui) => { player.ClosePanel(ui); })
                         .AddButton("Valider", (ui) =>
                         {
@@ -138,20 +138,18 @@ namespace FooxiiePub
 
         private static async void SendSMS(string name, string message, bool needPhone, string fromtel)
         {
-            List<Characters> list = await (from m in LifeDB.db.Table<Characters>()
+            var list = await (from m in LifeDB.db.Table<Characters>()
                 where m.AccountId >= 0
                 select m).ToListAsync();
-            foreach (Characters character in list)
+            foreach (var character in list)
             {
-                if (needPhone)
+                await LifeDB.SendSMS(character.Id, "69", character.PhoneNumber, Nova.UnixTimeNow(),
+                    needPhone ? $"[{name}]\n{message}\nTel:{fromtel}" : $"[{name}]\n{message}");
+                var contacts = await LifeDB.FetchContacts(character.Id);
+                var contactPub = contacts.contacts.Where(contact => contact.number == "69").ToList();
+                if (contactPub.Count == 0)
                 {
-                    LifeDB.SendSMS(character.Id, PubName, character.PhoneNumber, Nova.UnixTimeNow(),
-                        $"[{name}]\n{message}\nTel:{fromtel}");
-                }
-                else
-                {
-                    LifeDB.SendSMS(character.Id, PubName, character.PhoneNumber, Nova.UnixTimeNow(),
-                        $"[{name}]\n{message}");
+                    await LifeDB.CreateContact(character.Id, "69", PubName);
                 }
             }
 
@@ -163,7 +161,7 @@ namespace FooxiiePub
         }
     }
 
-    class Config
+    internal class Config
     {
         public double PricePub { get; set; }
         public List<String> ForbiddenWord { get; set; }
