@@ -4,7 +4,7 @@
 # To contribute and motivate myself:
 BuyMeACoffee : https://www.buymeacoffee.com/devfooxiie
 
-Discord : [https://discord.gg/VCRKu6uFf5](https://discord.gg/u3XuSFQDNh)
+Discord : [https://discord.gg/VCRKu6uFf5](https://discord.gg/aztFmNxEqp)
 
  # Installation
  There is 3 elements, 1 .dll the plugin, and a config.json file withi in the folder named "FooxiiePub".
